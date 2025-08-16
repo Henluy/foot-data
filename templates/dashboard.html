@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - Prédiction de Match</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Tableau de Bord du Modèle de Prédiction</h1>
+        </header>
+
+        <main class="grid-container">
+            <!-- Prediction Card -->
+            <section class="card" id="prediction-card">
+                <h2>Nouvelle Prédiction</h2>
+                <form action="/predict" method="post">
+                    <div class="form-group">
+                        <label for="home_form">Forme Domicile (0-15 pts):</label>
+                        <input type="number" id="home_form" name="home_form" min="0" max="15" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="away_form">Forme Extérieur (0-15 pts):</label>
+                        <input type="number" id="away_form" name="away_form" min="0" max="15" required>
+                    </div>
+                    <button type="submit">Prédire</button>
+                </form>
+            </section>
+
+            <!-- Metrics Card -->
+            <section class="card" id="metrics-card">
+                <h2>Performance du Modèle Actuel</h2>
+                {% if metrics %}
+                    <ul>
+                        <li><strong>Précision :</strong> {{ "%.2f"|format(metrics.accuracy * 100) }}%</li>
+                        <li><strong>Log-Loss :</strong> {{ "%.4f"|format(metrics.log_loss) }}</li>
+                    </ul>
+                    <h3>Rapport par Classe :</h3>
+                    <div class="report-details">
+                        <p><strong>Victoire (H):</strong> F1-Score = {{ "%.2f"|format(metrics.classification_report.H['f1-score']) }}</p>
+                        <p><strong>Nul (D):</strong> F1-Score = {{ "%.2f"|format(metrics.classification_report.D['f1-score']) }}</p>
+                        <p><strong>Défaite (A):</strong> F1-Score = {{ "%.2f"|format(metrics.classification_report.A['f1-score']) }}</p>
+                    </div>
+                {% else %}
+                    <p>Aucune métrique de modèle trouvée. Veuillez lancer le pipeline d'entraînement.</p>
+                {% endif %}
+            </section>
+
+            <!-- Confusion Matrix Card -->
+            <section class="card" id="cm-card">
+                <h2>Matrice de Confusion</h2>
+                {% if cm_image_url %}
+                    <img src="{{ cm_image_url }}" alt="Matrice de Confusion">
+                {% else %}
+                    <p>Image non disponible. Veuillez lancer le pipeline d'évaluation.</p>
+                {% endif %}
+            </section>
+
+            <!-- Data Sample Card -->
+            <section class="card" id="data-card">
+                <h2>Aperçu des Données</h2>
+                {% if data_sample %}
+                    {{ data_sample|safe }}
+                {% else %}
+                    <p>Aucun échantillon de données trouvé.</p>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
